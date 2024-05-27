@@ -1,14 +1,14 @@
+const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
-const PORT = 8001;
-// require("dotenv").config();
-const connectToDatabase = require("./database");
-const urlRoute = require("./routes/urlRoute");
-const URL = require("./model/urlModel");
 
+const PORT = 8001;
 app.use(express.json());
 
+const connectToDatabase = require("./database");
 connectToDatabase();
+const URL = require("./model/urlModel");
+const urlRoute = require("./routes/urlRoute");
 
 app.use("/url", urlRoute);
 app.use("/:shortId", async (req, res) => {
