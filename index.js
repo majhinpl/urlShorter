@@ -1,17 +1,26 @@
-const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
+const path = require("path");
 
 const PORT = 8001;
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.set("view engine", "ejs");
+app.set("views", path.resolve("./views"));
 
 const connectToDatabase = require("./database");
 connectToDatabase();
 const URL = require("./model/urlModel");
 const urlRoute = require("./routes/urlRoute");
+const staticRoute = require("./routes/staticRouter");
+const userRoute = require("./routes/userRoute");
 
 app.use("/url", urlRoute);
-app.use("/:shortId", async (req, res) => {
+app.use("/user", userRoute);
+app.use("/", staticRoute);
+
+app.get("/:shortId", async (req, res) => {
   const shortId = req.params.shortId;
   const entry = await URL.findOneAndUpdate(
     {
@@ -25,7 +34,13 @@ app.use("/:shortId", async (req, res) => {
       },
     }
   );
-  res.redirect(entry.redirectURL);
+
+  if (entry) {
+    res.redirect(entry.redirectURL);
+  } else {
+    console.error(`No entry found for shortId: ${shortId}`);
+    res.status(404).send("Not Found");
+  }
 });
 
 app.listen(PORT, () => {
