@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const cookieParser = require("cookies-parser");
 
 const PORT = 8001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.cookieParser());
 
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
@@ -16,7 +18,7 @@ const urlRoute = require("./routes/urlRoute");
 const staticRoute = require("./routes/staticRouter");
 const userRoute = require("./routes/userRoute");
 
-app.use("/url", urlRoute);
+app.use("/url", restrictTo urlRoute);
 app.use("/user", userRoute);
 app.use("/", staticRoute);
 
