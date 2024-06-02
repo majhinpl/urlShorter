@@ -13,16 +13,18 @@ app.set("views", path.resolve("./views"));
 
 const connectToDatabase = require("./database");
 connectToDatabase();
+
 const URL = require("./model/urlModel");
 const urlRoute = require("./routes/urlRoute");
 const staticRoute = require("./routes/staticRouter");
 const userRoute = require("./routes/userRoute");
+const { restrictToLoggedinUserOnly } = require("./middleware/auth");
 
-app.use("/url", restrictTo urlRoute);
+app.use("/url", restrictToLoggedinUserOnly, urlRoute);
 app.use("/user", userRoute);
 app.use("/", staticRoute);
 
-app.get("/:shortId", async (req, res) => {
+app.get("/url/:shortId", async (req, res) => {
   const shortId = req.params.shortId;
   const entry = await URL.findOneAndUpdate(
     {
@@ -36,13 +38,7 @@ app.get("/:shortId", async (req, res) => {
       },
     }
   );
-
-  if (entry) {
-    res.redirect(entry.redirectURL);
-  } else {
-    console.error(`No entry found for shortId: ${shortId}`);
-    res.status(404).send("Not Found");
-  }
+  res.redirect(entry.redirectURL);
 });
 
 app.listen(PORT, () => {
